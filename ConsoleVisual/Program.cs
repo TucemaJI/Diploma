@@ -15,8 +15,8 @@ namespace Finder
             var service = new FinderService();
 
             
-            var thread = new Thread(new ParameterizedThreadStart(service.Search));
-            thread.Start(path);
+            var task = new Task(() => service.Search(path));
+            task.Start();
 
             while (true)
             {

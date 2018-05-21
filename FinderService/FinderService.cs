@@ -14,10 +14,9 @@ namespace Finder
         static bool pause;
         EventWaitHandle waitHandler = new AutoResetEvent(pause);
 
-        public void Search(object location)
+        public void Search(string locationToSearch)
         {
             waitHandler.WaitOne();
-            string locationToSearch = location.ToString();
 
             if (!locationToSearch.EndsWith("\\"))
             {
@@ -43,9 +42,8 @@ namespace Finder
                 var subdirs = Directory.GetAccessControl(subdirectory);
                 if (!subdirs.AreAccessRulesProtected)
                 {
-                    var thread = new Thread(new ParameterizedThreadStart(Search));
-                    thread.IsBackground = true;
-                    thread.Start(subdirectory);
+                    var task = new Task(() => Search(subdirectory));
+                    task.Start();
                 }
             }
             waitHandler.Set();
