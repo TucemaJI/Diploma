@@ -8,10 +8,11 @@ using System.IO;
 
 namespace Finder
 {
+
     public class FinderService
     {
-        static bool pause = true;
-        AutoResetEvent waitHandler = new AutoResetEvent(pause);
+        static bool pause;
+        EventWaitHandle waitHandler = new AutoResetEvent(pause);
 
         public void Search(object location)
         {
@@ -43,6 +44,7 @@ namespace Finder
                 if (!subdirs.AreAccessRulesProtected)
                 {
                     var thread = new Thread(new ParameterizedThreadStart(Search));
+                    thread.IsBackground = true;
                     thread.Start(subdirectory);
                 }
             }
@@ -51,14 +53,16 @@ namespace Finder
 
         public void Pause()
         {
-            var consoleKey = Console.ReadKey();
-            if (consoleKey.Key == ConsoleKey.Spacebar)
+            switch (Console.ReadKey(true).Key)
             {
-                if (!pause)
-                {
+                case ConsoleKey.Spacebar:
+                    waitHandler.WaitOne();
+                    pause = false;
+                    break;
+                case ConsoleKey.Enter:
+                    waitHandler.Set();
                     pause = true;
-                }
-                else { pause = false; }
+                    break;
             }
         }
 
